@@ -3,6 +3,7 @@ import path from "path";
 import express from "express";
 import cors from "cors";
 import usuariosRouters from "../routes/usuarios.routes.js";
+import  dbConnection  from "../database/config.js";
 
 
 export class Server {
@@ -12,12 +13,21 @@ export class Server {
         this.port = process.env.PORT;
         this.usuarioPath = '/api/usuarios';
 
+
+        //* Conexion a la DB
+        this.conectarDB();
+
+
         //* Middlewares
         this.middlewares();
         
 
         //* Rutas de mi aplicacion
         this.routes();
+    }
+
+    async conectarDB() {
+        await dbConnection();
     }
 
     middlewares() {
