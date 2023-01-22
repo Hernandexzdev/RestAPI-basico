@@ -1,4 +1,4 @@
-import {Schema, model} from "mongoose";
+import mongoose, {Schema, model} from "mongoose";
 
 
 const usuarioSchema =  Schema({
@@ -22,23 +22,23 @@ const usuarioSchema =  Schema({
     rol: {
         type: String,
         required: true,
+        default: 'USER_ROLE',
         emun: ['ADMIN_ROLE', 'USER_ROL']
     },
     estado: {
         type: Boolean,
-        dafault: true
+        default: true
 
     },
     google: {
         type: Boolean,
-        default: true
+        default: false
     }
-
 })
 
 usuarioSchema.methods.toJSON = function() {
-    const { __v, password, ...usuario} = this.toObject();
-
+    const { __v, password, _id, ...usuario} = this.toObject();
+    usuario.uid = _id;
     return usuario;
     
 }

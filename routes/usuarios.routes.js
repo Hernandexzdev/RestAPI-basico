@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { check } from "express-validator";
-import colors from "colors";
-import PrettyError from "pretty-error";
-import  validarCampos  from "../middlewares/validar-campos.js";
+import { body, param } from "express-validator";
+import { validarCampos } from "../middlewares/validar-campos.js";
+import { validarJWT } from "../middlewares/validar-jwt.js";
+import {  tieneRole } from "../middlewares/validar-roles.js";
 import { esRolValido, emailExiste, existeUsuarioPorID } from "../helpers/db-validators.js";
 import { usuariosGet, usuariosPut, usuariosPost, usuariosPatch, usuariosDelete } from "../controllers/usuarios.controller.js";
+
 
 
 const router = Router();
@@ -12,25 +13,28 @@ const router = Router();
 router.get('/', usuariosGet);
 
 router.put('/:id', [
-                check('id', 'No es un ID Valido').isMongoId(),
-                check('id').custom( existeUsuarioPorID ),
-                check('rol').custom( esRolValido ),
+                param('id', 'No es un ID Valido').isMongoId(),
+                param('id').custom( existeUsuarioPorID ),
+                body('rol').custom( esRolValido ),
                 validarCampos
 ] ,usuariosPut);
 
 router.post('/', [
-    check('nombre', 'El nombre es obligatorio').not().isEmpty(),
-    check('password', 'La contraseña es obligatoria y debe tener mas de 8 caracteres').isLength({ min: 8, max: 15}),
-    check('correo').custom( emailExiste ),
+    body('nombre', 'El nombre es obligatorio').not().isEmpty(),
+    body('password', 'La contraseña es obligatoria y debe tener mas de 8 caracteres').isLength({ min: 8, max: 15}),
+    body('correo').custom( emailExiste ),
     // check('rol', "No es un rol valido").isIn(['ADMIN_ROLE', 'USER_ROLE']),
-    check('rol').custom( esRolValido ),
+    body('rol').custom( esRolValido ),
     validarCampos
 
 ],usuariosPost);
 
 router.delete('/:id', [
-    check('id', 'No es un ID Valido').isMongoId(),
-    check('id').custom( existeUsuarioPorID ),
+    validarJWT,
+    tieneRole('ADMIN_ROLE', 'VENTAR_ROLE', 'OTRO_ROLE'),
+    param('id', 'No es un ID Valido').isMongoId(),
+    param('id').custom( existeUsuarioPorID ),
+    validarCampos
 ] ,usuariosDelete);
 
 router.patch('/', usuariosPatch);

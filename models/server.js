@@ -2,6 +2,7 @@ import {fileURLToPath} from "url";
 import path from "path";
 import express from "express";
 import cors from "cors";
+import loginRoutes from "../routes/auth.routes.js";
 import usuariosRouters from "../routes/usuarios.routes.js";
 import  dbConnection  from "../database/config.js";
 
@@ -12,6 +13,7 @@ export class Server {
         this.app  = express();
         this.port = process.env.PORT;
         this.usuarioPath = '/api/usuarios';
+        this.authPath = '/api/auth';
 
 
         //* Conexion a la DB
@@ -46,7 +48,9 @@ export class Server {
     }
 
     routes(){
-        
+        //* Agregar ruta de autenticacion de usuario
+        this.app.use(this.authPath, loginRoutes);
+
         this.app.use( this.usuarioPath, usuariosRouters );
     }
 
